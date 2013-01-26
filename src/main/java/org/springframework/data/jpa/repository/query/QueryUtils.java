@@ -58,6 +58,7 @@ import org.springframework.util.StringUtils;
 public abstract class QueryUtils {
 
 	public static final String COUNT_QUERY_STRING = "select count(%s) from %s x";
+    public static final String EQUALS_CONDITION_STRING ="%s.%s = :%s";
 	public static final String EXISTS_QUERY_STRING = "select count(%s) from %s x where x.%s = :id";
 
 	public static final String DELETE_ALL_QUERY_STRING = "delete from %s x";
@@ -112,6 +113,18 @@ public abstract class QueryUtils {
 	private QueryUtils() {
 
 	}
+
+
+    public static String getExistsQueryString(String entityName, String countQueryPlaceHolder, String ... idAttributes){
+        StringBuilder sb = new StringBuilder(String.format(COUNT_QUERY_STRING, countQueryPlaceHolder, entityName));
+        sb.append(" WHERE ");
+        for(String idAttribute : idAttributes){
+            sb.append(String.format(EQUALS_CONDITION_STRING,"x",idAttribute,idAttribute));
+            sb.append(" AND ");
+        }
+        sb.append("1 = 1");
+        return sb.toString();
+    }
 
 	/**
 	 * Returns the query string for the given class name.

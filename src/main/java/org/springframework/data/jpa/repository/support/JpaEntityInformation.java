@@ -16,6 +16,7 @@
 package org.springframework.data.jpa.repository.support;
 
 import java.io.Serializable;
+import java.util.Set;
 
 import javax.persistence.metamodel.SingularAttribute;
 
@@ -35,7 +36,36 @@ public interface JpaEntityInformation<T, ID extends Serializable> extends Entity
 	 */
 	SingularAttribute<? super T, ?> getIdAttribute();
 
-	/**
+
+    /**
+     * Returns true if the entity has a composite id
+     *
+     * @return
+     */
+    boolean hasCompositeId();
+
+
+    /**
+     * Returns the attribute name of the id attributes.
+     *
+     * If the entity has a composite id, then all id attribute names are returned.
+     * If the entity has a single id attribute then this single attribute name is returned
+     *
+     * @return
+     */
+    String[] getIdAttributeNames();
+
+
+    /**
+     * Extracts the value for the given id attribute from a composite id
+     *
+     * @param id
+     * @param idAttribute
+     * @return
+     */
+    Object getCompositeIdAttributeValue(Serializable id, String idAttribute);
+
+    /**
 	 * Returns the JPA entity name.
 	 * 
 	 * @return

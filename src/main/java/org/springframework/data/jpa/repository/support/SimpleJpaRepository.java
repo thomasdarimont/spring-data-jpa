@@ -219,11 +219,19 @@ public class SimpleJpaRepository<T, ID extends Serializable> implements JpaRepos
 
 			String placeholder = provider.getCountQueryPlaceholder();
 			String entityName = entityInformation.getEntityName();
-			String idAttributeName = entityInformation.getIdAttribute().getName();
-			String existsQuery = String.format(EXISTS_QUERY_STRING, placeholder, entityName, idAttributeName);
+            String[] idAttributeNames = entityInformation.getIdAttributeNames();
+            String existsQuery  = QueryUtils.getExistsQueryString(entityName, placeholder, idAttributeNames);
 
-			TypedQuery<Long> query = em.createQuery(existsQuery, Long.class);
-			query.setParameter("id", id);
+            TypedQuery<Long> query = em.createQuery(existsQuery, Long.class);
+
+            if(entityInformation.hasCompositeId()){
+                for(String idAttributeName : idAttributeNames){
+                    query.setParameter(idAttributeName, entityInformation.getCompositeIdAttributeValue(id, idAttributeName));
+                }
+            }else{
+                query.setParameter(idAttributeNames[0], id);
+            }
+
 
 			return query.getSingleResult() == 1;
 		} else {

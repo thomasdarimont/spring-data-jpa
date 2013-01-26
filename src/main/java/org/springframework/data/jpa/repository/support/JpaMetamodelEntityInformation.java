@@ -118,7 +118,25 @@ public class JpaMetamodelEntityInformation<T, ID extends Serializable> extends J
 		return idMetadata.getSimpleIdAttribute();
 	}
 
-	/**
+    public boolean hasCompositeId() {
+        return !idMetadata.hasSimpleId();
+    }
+
+    public String[] getIdAttributeNames() {
+        String[] attributeNames = new String[idMetadata.attributes.size()];
+        int i = 0;
+        for(SingularAttribute<? super T, ?> attribute : idMetadata.attributes){
+            attributeNames[i++] = attribute.getName();
+        }
+        return attributeNames;
+    }
+
+    public Object getCompositeIdAttributeValue(Serializable id, String idAttribute) {
+        assert !idMetadata.hasSimpleId();
+        return new DirectFieldAccessFallbackBeanWrapper(id).getPropertyValue(idAttribute);
+    }
+
+    /**
 	 * Simple value object to encapsulate id specific metadata.
 	 * 
 	 * @author Oliver Gierke

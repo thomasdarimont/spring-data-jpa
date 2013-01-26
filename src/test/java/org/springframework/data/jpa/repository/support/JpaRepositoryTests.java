@@ -90,6 +90,20 @@ public class JpaRepositoryTests {
 		assertThat(idClassRepository.findOne(id), is(entity));
 	}
 
+
+    /**
+     * DATAJPA-266
+     */
+    @Test
+    public void testExistsForDomainObjectsWithCompositeKeys() throws Exception {
+        SampleWithIdClass s1 = new SampleWithIdClass(1L, 1L);
+        idClassRepository.save(s1);
+        SampleWithIdClass s2 = new SampleWithIdClass(2L, 2L);
+        idClassRepository.save(s2);
+
+        assertTrue(idClassRepository.exists(new SampleWithIdClassPK(2L,2L)));
+    }
+
 	private static interface SampleEntityRepository extends JpaRepository<SampleEntity, SampleEntityPK> {
 
 	}
