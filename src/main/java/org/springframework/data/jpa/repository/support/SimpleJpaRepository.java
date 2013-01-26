@@ -26,11 +26,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.LockModeType;
 import javax.persistence.NoResultException;
 import javax.persistence.TypedQuery;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Path;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
+import javax.persistence.criteria.*;
 
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.Page;
@@ -219,21 +215,20 @@ public class SimpleJpaRepository<T, ID extends Serializable> implements JpaRepos
 
 			String placeholder = provider.getCountQueryPlaceholder();
 			String entityName = entityInformation.getEntityName();
-            String[] idAttributeNames = entityInformation.getIdAttributeNames();
-            String existsQuery  = QueryUtils.getExistsQueryString(entityName, placeholder, idAttributeNames);
+			String[] idAttributeNames = entityInformation.getIdAttributeNames();
+			String existsQuery = QueryUtils.getExistsQueryString(entityName, placeholder, idAttributeNames);
 
-            TypedQuery<Long> query = em.createQuery(existsQuery, Long.class);
+			TypedQuery<Long> query = em.createQuery(existsQuery, Long.class);
 
-            if(entityInformation.hasCompositeId()){
-                for(String idAttributeName : idAttributeNames){
-                    query.setParameter(idAttributeName, entityInformation.getCompositeIdAttributeValue(id, idAttributeName));
-                }
-            }else{
-                query.setParameter(idAttributeNames[0], id);
-            }
+			if (entityInformation.hasCompositeId()) {
+				for (String idAttributeName : idAttributeNames) {
+					query.setParameter(idAttributeName, entityInformation.getCompositeIdAttributeValue(id, idAttributeName));
+				}
+			} else {
+				query.setParameter(idAttributeNames[0], id);
+			}
 
-
-			return query.getSingleResult() == 1;
+			return query.getSingleResult() == 1L;
 		} else {
 			return findOne(id) != null;
 		}
