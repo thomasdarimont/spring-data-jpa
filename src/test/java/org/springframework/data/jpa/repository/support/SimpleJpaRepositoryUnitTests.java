@@ -103,7 +103,7 @@ public class SimpleJpaRepositoryUnitTests {
 	public void shouldPropagateConfiguredEntityGraphToFindOne() {
 
 		String entityGraphName = "User.detail";
-		when(metadata.getEntityGraph()).thenReturn(new JpaEntityGraph(entityGraphName, EntityGraphType.LOAD));
+		when(metadata.getEntityGraph()).thenReturn(new JpaEntityGraph(entityGraphName, EntityGraphType.LOAD, null));
 		when(em.getEntityGraph(entityGraphName)).thenReturn((EntityGraph) entityGraph);
 
 		Integer id = 0;

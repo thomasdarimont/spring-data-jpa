@@ -173,7 +173,7 @@ public class JpaQueryMethod extends QueryMethod {
 	JpaEntityGraph getEntityGraph() {
 
 		EntityGraph annotation = findAnnotation(method, EntityGraph.class);
-		return annotation == null ? null : new JpaEntityGraph(annotation.value(), annotation.type());
+		return annotation == null ? null : new JpaEntityGraph(annotation.value(), annotation.type(), annotation.attributeNodes());
 	}
 
 	/**

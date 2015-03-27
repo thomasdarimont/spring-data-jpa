@@ -248,7 +248,7 @@ public class SimpleJpaRepository<T, ID extends Serializable> implements JpaRepos
 
 		Map<String, Object> hints = new HashMap<String, Object>();
 		hints.putAll(metadata.getQueryHints());
-		hints.putAll(Jpa21Utils.tryGetFetchGraphHints(em, metadata.getEntityGraph()));
+		hints.putAll(Jpa21Utils.tryGetFetchGraphHints(em, metadata.getEntityGraph(), getDomainClass()));
 
 		return hints;
 	}

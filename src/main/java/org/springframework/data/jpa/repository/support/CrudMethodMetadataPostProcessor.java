@@ -156,7 +156,7 @@ enum CrudMethodMetadataPostProcessor implements RepositoryProxyPostProcessor {
 
 			EntityGraph entityGraphAnnotation = AnnotationUtils.findAnnotation(method, EntityGraph.class);
 			return entityGraphAnnotation == null ? null : new JpaEntityGraph(entityGraphAnnotation.value(),
-					entityGraphAnnotation.type());
+					entityGraphAnnotation.type(), entityGraphAnnotation.attributeNodes());
 		}
 
 		private static LockModeType findLockModeType(Method method) {

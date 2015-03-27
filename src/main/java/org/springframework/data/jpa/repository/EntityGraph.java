@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 the original author or authors.
+ * Copyright 2014-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,8 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+
+import javax.persistence.NamedAttributeNode;
 
 /**
  * Annotation to configure the JPA 2.1 {@link javax.persistence.EntityGraph}s that should be used on repository methods.
@@ -45,6 +47,13 @@ public @interface EntityGraph {
 	 * @return
 	 */
 	EntityGraphType type() default EntityGraphType.FETCH;
+	
+	/**
+	 * The {@link NamedAttributeNode}s of this {@link EntityGraph} to use, empty by default.
+	 * 
+	 * @return
+	 */
+	NamedAttributeNode[] attributeNodes() default {};
 
 	/**
 	 * Enum for JPA 2.1 {@link javax.persistence.EntityGraph} types.

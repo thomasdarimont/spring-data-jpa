@@ -99,4 +99,25 @@ public class EntityGraphRepositoryMethodsIntegrationTests {
 		assertThat("colleages should be fetched with 'user.detail' fetchgraph",
 				Persistence.getPersistenceUtil().isLoaded(user.getColleagues()), is(true));
 	}
+	
+	/**
+	 * @see DATAJPA-XXX
+	 */
+	@Test
+	public void shouldRespectDynamicEntityGraphInGetOneBy() {
+
+		Assume.assumeTrue(currentEntityManagerIsAJpa21EntityManager(em));
+
+		olli = repository.save(olli);
+		tom.getColleagues().add(olli);
+		tom = repository.save(tom);
+
+		em.flush();
+
+		User user = repository.getOneBy(tom.getId());
+
+		assertThat(user, is(notNullValue()));
+		assertThat("colleages should be fetched with 'user.detail' fetchgraph",
+				Persistence.getPersistenceUtil().isLoaded(user.getColleagues()), is(true));
+	}
 }

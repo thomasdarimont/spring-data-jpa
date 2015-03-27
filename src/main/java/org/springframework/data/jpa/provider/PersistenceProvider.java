@@ -18,13 +18,17 @@ package org.springframework.data.jpa.provider;
 import static org.springframework.data.jpa.provider.JpaClassUtils.*;
 import static org.springframework.data.jpa.provider.PersistenceProvider.Constants.*;
 
+import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
+import javax.persistence.EntityGraph;
 import javax.persistence.EntityManager;
+import javax.persistence.NamedAttributeNode;
 import javax.persistence.Query;
 import javax.persistence.metamodel.Metamodel;
 
@@ -42,10 +46,13 @@ import org.hibernate.ScrollableResults;
 import org.hibernate.ejb.HibernateQuery;
 import org.hibernate.proxy.HibernateProxy;
 import org.springframework.beans.DirectFieldAccessor;
+import org.springframework.data.jpa.repository.query.JpaEntityGraph;
 import org.springframework.data.util.CloseableIterator;
+import org.springframework.orm.jpa.EntityManagerProxy;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
+import org.springframework.util.ReflectionUtils;
 
 /**
  * Enumeration representing persistence providers to be used.
@@ -117,6 +124,38 @@ public enum PersistenceProvider implements QueryExtractor, ProxyIdAccessor {
 		@Override
 		public CloseableIterator<Object> executeQueryWithResultStream(Query jpaQuery) {
 			return new HibernateScrollableResultsIterator<Object>(jpaQuery);
+		}
+
+		@Override
+		public EntityGraph<?> tryCreateEntityGraph(EntityManager em, JpaEntityGraph jpaEntityGraph, Class<?> entityType) {
+
+			EntityManager targetEntityManager = ((EntityManagerProxy) em).getTargetEntityManager();
+			Method createGraphMethod = ReflectionUtils.findMethod(targetEntityManager.getClass(), "createEntityGraph",
+					Class.class);
+			ReflectionUtils.makeAccessible(createGraphMethod);
+
+			EntityGraph<?> mutableEntityGraph = (EntityGraph<?>) ReflectionUtils.invokeMethod(createGraphMethod,
+					targetEntityManager, entityType);
+
+			Method addAttributeNodesMethod = ReflectionUtils.findMethod(mutableEntityGraph.getClass(), "addAttributeNodes",
+					String[].class);
+			ReflectionUtils.makeAccessible(addAttributeNodesMethod);
+
+			List<String> attributeNames = new ArrayList<String>();
+			for (NamedAttributeNode nodes : jpaEntityGraph.getNamedAttributeNodes()) {
+				attributeNames.add(nodes.value());
+			}
+
+			String[] strings = attributeNames.toArray(new String[attributeNames.size()]);
+			ReflectionUtils.invokeMethod(addAttributeNodesMethod, mutableEntityGraph, new Object[]{strings});
+			
+			Method makeImmutableCopyMethod = ReflectionUtils.findMethod(mutableEntityGraph.getClass(), "makeImmutableCopy",
+					String.class);
+			ReflectionUtils.makeAccessible(makeImmutableCopyMethod);
+			
+			EntityGraph<?> graph = (EntityGraph<?>) ReflectionUtils.invokeMethod(makeImmutableCopyMethod, mutableEntityGraph, jpaEntityGraph.getName());
+
+			return graph;
 		}
 	},
 
@@ -352,6 +391,11 @@ public enum PersistenceProvider implements QueryExtractor, ProxyIdAccessor {
 	public CloseableIterator<Object> executeQueryWithResultStream(Query jpaQuery) {
 		throw new UnsupportedOperationException("Streaming results is not implement for this PersistenceProvider: "
 				+ name());
+	}
+
+	public EntityGraph<?> tryCreateEntityGraph(EntityManager em, JpaEntityGraph jpaEntityGraph, Class<?> entityType) {
+		throw new UnsupportedOperationException("tryCreateEntityGraph is not supported by this PersistenceProvider: "
+				+ this);
 	}
 
 	/**

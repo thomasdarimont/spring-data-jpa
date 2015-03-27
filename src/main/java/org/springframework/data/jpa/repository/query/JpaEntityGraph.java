@@ -1,5 +1,5 @@
 /*
- * Copyright 2014 the original author or authors.
+ * Copyright 2014-2015 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,7 +15,10 @@
  */
 package org.springframework.data.jpa.repository.query;
 
+import java.util.Arrays;
+
 import javax.persistence.EntityGraph;
+import javax.persistence.NamedAttributeNode;
 
 import org.springframework.data.jpa.repository.EntityGraph.EntityGraphType;
 import org.springframework.util.Assert;
@@ -28,22 +31,27 @@ import org.springframework.util.Assert;
  */
 public class JpaEntityGraph {
 
+	private static NamedAttributeNode[] EMPTY_NAMED_ATTRIBUTE_NODES = {};
+	
 	private final String name;
 	private final EntityGraphType type;
+	private final NamedAttributeNode[] namedAttributeNodes;
 
 	/**
 	 * Creates an {@link JpaEntityGraph}.
 	 * 
 	 * @param name must not be {@null} or empty.
 	 * @param type must not be {@null}.
+	 * @param namedAttributeNodes may be {@null}.
 	 */
-	public JpaEntityGraph(String name, EntityGraphType type) {
+	public JpaEntityGraph(String name, EntityGraphType type, NamedAttributeNode[] namedAttributeNodes) {
 
 		Assert.hasText(name, "The name of an EntityGraph must not be null or empty!");
 		Assert.notNull(type, "FetchGraphType must not be null!");
 
 		this.name = name;
 		this.type = type;
+		this.namedAttributeNodes = namedAttributeNodes == null ? EMPTY_NAMED_ATTRIBUTE_NODES : namedAttributeNodes;
 	}
 
 	/**
@@ -63,6 +71,14 @@ public class JpaEntityGraph {
 	public EntityGraphType getType() {
 		return type;
 	}
+	
+	public NamedAttributeNode[] getNamedAttributeNodes() {
+		return namedAttributeNodes;
+	}
+	
+	public boolean isDynamicEntityGraph(){
+		return this.namedAttributeNodes.length>0;
+	}
 
 	/* 
 	 * (non-Javadoc)
@@ -70,6 +86,6 @@ public class JpaEntityGraph {
 	 */
 	@Override
 	public String toString() {
-		return "JpaEntityGraph [name=" + name + ", type=" + type + "]";
+		return "JpaEntityGraph [name=" + name + ", type=" + type + ", named attributeNodes=" + Arrays.toString(namedAttributeNodes) +"]";
 	}
 }

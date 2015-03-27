@@ -17,6 +17,8 @@ package org.springframework.data.jpa.repository.sample;
 
 import java.util.List;
 
+import javax.persistence.NamedAttributeNode;
+
 import org.springframework.data.jpa.domain.sample.User;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.EntityGraph.EntityGraphType;
@@ -41,4 +43,7 @@ public interface RepositoryMethodsWithEntityGraphConfigJpaRepository extends Jpa
 	 */
 	@EntityGraph(type = EntityGraphType.FETCH, value = "User.detail")
 	User findOne(Integer id);
+	
+	@EntityGraph(type = EntityGraphType.FETCH, value = "User.getOneBy", attributeNodes = { @NamedAttributeNode("roles") })
+	User getOneBy(Integer id);
 }
